@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum Status {
+  TODO
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum SubscriptionStatus {
+  FREE
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  password  String?
+  image     String?
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  workspaceMembers WorkspaceMember[]
+  assignedTasks    Task[]
+  sentInvitation   Invitation[]
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  members      WorkspaceMember[]
+  projects     Project[]
+  invitations  Invitation[]
+  subscription Subscription?
+}
+
+model WorkspaceMember {
+  userId      String
+  workspaceId String
+  user        User      @relation(fields: [userId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  role        Role      @default(MEMBER)
+  createdAt   DateTime  @default(now())
+
+  @@id([userId, workspaceId])
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  createdAt   DateTime @default(now())
+
+  tasks Task[]
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      Status   @default(TODO)
+  priority    Priority @default(MEDIUM)
+  projectId   String
+  assigneeId  String?
+  project     Project  @relation(fields: [projectId], references: [id])
+  assignee    User?    @relation(fields: [assigneeId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Invitation {
+  id          String           @id @default(cuid())
+  email       String
+  role        Role
+  status      InvitationStatus @default(PENDING)
+  workspaceId String
+  invitedById String
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id])
+  invitedBy   User             @relation(fields: [invitedById], references: [id])
+  expiresAt   DateTime
+
+  @@unique([email, workspaceId])
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  workspaceId          String             @unique
+  stripeSubscriptionId String
+  stripeCustomerId     String
+  status               SubscriptionStatus @default(FREE)
+  currentPeriodEnd     DateTime
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+}
