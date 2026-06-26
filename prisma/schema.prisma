@@ -58,6 +58,7 @@ model Workspace {
   id        String   @id @default(cuid())
   slug      String   @unique
   name      String
+  isPublic  Boolean  @default(false)
   createdAt DateTime @default(now())
 
   members      WorkspaceMember[]

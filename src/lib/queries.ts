@@ -10,3 +10,10 @@ export async function getUserByEmail(email: string) {
 export async function getWorkspaces() {
   return await db.workspace.findMany();
 }
+
+export async function getPublicWorkspaces() {
+  return await db.workspace.findMany({
+    where: { isPublic: true },
+    orderBy: { createdAt: "desc" },
+  });
+}
