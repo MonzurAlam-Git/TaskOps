@@ -20,7 +20,7 @@ export default function Nav() {
         </nav>
         <div className="flex items-center gap-4">
           <Link
-            href="/auth/sigin"
+            href="/auth/signIn"
             className="text-sm font-medium text-gray-900 hover:underline"
           >
             Sign in

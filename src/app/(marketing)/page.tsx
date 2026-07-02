@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function HomePage() {
+export default async function HomePage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-16">
       <div className="text-center">
