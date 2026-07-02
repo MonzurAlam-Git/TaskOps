@@ -8,7 +8,7 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Role {
+enum UserRole {
   OWNER
   ADMIN
   MEMBER
@@ -42,12 +42,13 @@ enum SubscriptionStatus {
 }
 
 model User {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
   name      String
   password  String?
   image     String?
-  email     String   @unique
-  createdAt DateTime @default(now())
+  email     String    @unique
+  createdAt DateTime  @default(now())
+  role      UserRole  @default(MEMBER)
 
   workspaceMembers WorkspaceMember[]
   assignedTasks    Task[]
@@ -72,7 +73,8 @@ model WorkspaceMember {
   workspaceId String
   user        User      @relation(fields: [userId], references: [id])
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
-  role        Role      @default(MEMBER)
+  role        UserRole  @default(MEMBER)
+
   createdAt   DateTime  @default(now())
 
   @@id([userId, workspaceId])
@@ -105,7 +107,7 @@ model Task {
 model Invitation {
   id          String           @id @default(cuid())
   email       String
-  role        Role
+  role        UserRole
   status      InvitationStatus @default(PENDING)
   workspaceId String
   invitedById String

@@ -1,8 +1,8 @@
-import type { UserRole } from "@/generated/prisma";
 import bcrypt from "bcryptjs";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
+import { UserRole } from "./src/generated/prisma";
 import { db } from "./src/lib/db";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -26,11 +26,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: { email: email },
         });
 
-        if (!user) {
-          return null;
-        }
-        const userPassword = bcrypt.compare(password, user.passwordHash);
-        if (!userPassword) {
+        if (!user || !user.password) return null;
+
+        const isValid = await bcrypt.compare(password, user.password);
+        if (!isValid) {
           return null;
         }
 
